@@ -1,6 +1,6 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -32,21 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-### Configuração local / segredos ###
-.env
-.env.*
-!.env.example
-application-local.properties
-application-local.yml
-
-### H2 em arquivo ###
-*.mv.db
-*.trace.db
+### Mac OS ###
+.DS_Store
 
 ### Logs ###
 *.log
-logs/
-
-### Sistema operacional ###
-.DS_Store
-Thumbs.db
