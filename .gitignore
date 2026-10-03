@@ -37,3 +37,8 @@ build/
 
 ### Logs ###
 *.log
+
+### Variáveis de ambiente ###
+.env
+.env.*
+application-local.properties
