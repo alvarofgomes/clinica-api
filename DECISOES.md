@@ -61,6 +61,11 @@ incluindo um agendamento cancelado, que demonstra a preservação do histórico.
 comandos usam `ON CONFLICT DO NOTHING` e ajustam as sequências de id, de modo que a
 carga é idempotente e a aplicação pode ser reiniciada sem erro.
 
+**`docker-compose.yml` para subir o banco**, com o banco, usuário e senha já alinhados
+aos valores padrão da aplicação. Assim o projeto roda com dois comandos, sem exigir
+PostgreSQL instalado. A execução com um PostgreSQL local continua possível e está
+documentada no README.
+
 **Credenciais por variáveis de ambiente**, com valores padrão para execução local
 (`${DB_PASSWORD:1234}`). Isso permite que o avaliador execute o projeto sem
 configuração adicional, mas mantém a configuração externalizável. Em um projeto com
@@ -146,10 +151,6 @@ expõem dados de pacientes.
 **Instalação do Oracle.** Em vez disso, demonstrei compatibilidade mantendo a
 persistência agnóstica ao banco (conforme descrito acima).
 
-**Containerização com Docker.** Optei por instruções diretas de configuração no README,
-priorizando a conclusão dos requisitos. Em um projeto real, incluiria um
-`docker-compose.yml` para padronizar o ambiente de execução.
-
 ---
 
 ## 3. Uso de IA
@@ -167,7 +168,7 @@ persistência real atendia melhor ao requisito.
 A validação foi feita em duas frentes: testei manualmente todos os endpoints no
 Postman, incluindo os casos de erro (conflito de horário, data no passado, CPF
 duplicado, validações de campo e cancelamento duplicado), conferindo status HTTP e
-corpo das respostas; e escrevi testes automatizados unitários e de integração
+corpo das respostas; e escrevi testes automatizados — unitários e de integração —
 cobrindo as regras de negócio. Durante os testes manuais identifiquei que a busca por
 id de agendamento não existia e retornava um erro fora do padrão da API, e implementei
 o endpoint para manter a consistência das respostas.

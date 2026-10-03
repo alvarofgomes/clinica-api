@@ -24,7 +24,7 @@ negócio, listar com filtros e cancelar mantendo o histórico.
 ## Pré-requisitos
 
 - **JDK 21** ou superior
-- **PostgreSQL** em execução (porta padrão 5432)
+- **Docker** (recomendado) **ou** PostgreSQL instalado na porta 5432
 - **Maven** (ou use o wrapper `mvnw` incluso no projeto)
 
 ---
@@ -38,9 +38,26 @@ git clone https://github.com/alvarofgomes/clinica-api.git
 cd clinica-api
 ```
 
-### 2. Crie o banco de dados
+### 2. Suba o banco de dados
 
-No PostgreSQL, crie um banco chamado `clinica`:
+**Opção A — com Docker (recomendado):**
+
+```bash
+docker compose up -d
+```
+
+Isso sobe um PostgreSQL já configurado com o banco `clinica`, usuário e senha que a
+aplicação espera por padrão. Nada mais precisa ser ajustado.
+
+Para parar depois:
+
+```bash
+docker compose down
+```
+
+**Opção B — com PostgreSQL instalado localmente:**
+
+Crie um banco chamado `clinica`:
 
 ```sql
 CREATE DATABASE clinica;
@@ -52,7 +69,8 @@ Pelo terminal:
 psql -U postgres -c "CREATE DATABASE clinica;"
 ```
 
-> As tabelas são criadas automaticamente pelo Hibernate na primeira execução.
+> Em ambos os casos, as tabelas são criadas automaticamente pelo Hibernate e o banco é
+> populado com dados de exemplo na primeira execução.
 
 ### 3. Configure as credenciais (se necessário)
 
@@ -66,8 +84,9 @@ A aplicação usa os seguintes valores por padrão:
 | `DB_USER`     | `postgres`  | Usuário              |
 | `DB_PASSWORD` | `1234`      | Senha                |
 
-Se a sua configuração for diferente, defina as variáveis de ambiente antes de executar.
-Exemplo no Linux/macOS:
+Esses são exatamente os valores configurados no `docker-compose.yml`, então usando a
+opção A nada precisa ser alterado. Se a sua configuração for diferente, defina as
+variáveis de ambiente antes de executar. Exemplo no Linux/macOS:
 
 ```bash
 export DB_USER=meu_usuario
