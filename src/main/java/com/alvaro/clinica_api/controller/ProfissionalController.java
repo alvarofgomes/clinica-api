@@ -5,12 +5,16 @@ import com.alvaro.clinica_api.dto.ProfissionalRequestDTO;
 import com.alvaro.clinica_api.dto.ProfissionalResponseDTO;
 import com.alvaro.clinica_api.model.Profissional;
 import com.alvaro.clinica_api.service.ProfissionalService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profissionais")
+@Tag(name = "Profissionais", description = "Cadastro e consulta de profissionais")
 public class ProfissionalController {
 
     private final ProfissionalService profissionalService;
@@ -20,6 +24,7 @@ public class ProfissionalController {
     }
 
     @PostMapping
+    @Operation(summary = "Cadastra um profissional")
     public ResponseEntity<ProfissionalResponseDTO> criar(
             @RequestBody @Valid ProfissionalRequestDTO dados) {
         Profissional profissional = new Profissional();
@@ -31,11 +36,13 @@ public class ProfissionalController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca um profissional por id")
     public ResponseEntity<ProfissionalResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(ProfissionalResponseDTO.de(profissionalService.buscarPorId(id)));
     }
 
     @GetMapping
+    @Operation(summary = "Lista todos os profissionais")
     public ResponseEntity<List<ProfissionalResponseDTO>> listar() {
         List<ProfissionalResponseDTO> lista = profissionalService.listarTodos()
             .stream()
