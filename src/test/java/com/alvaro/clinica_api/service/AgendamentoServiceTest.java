@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.alvaro.clinica_api.exception.ConflitoHorarioException;
+import com.alvaro.clinica_api.exception.RecursoNaoEncontradoException;
 import com.alvaro.clinica_api.exception.RegraNegocioException;
 import com.alvaro.clinica_api.model.Agendamento;
 import com.alvaro.clinica_api.model.Paciente;
@@ -91,4 +92,91 @@ class AgendamentoServiceTest {
         assertEquals(motivo, cancelado.getMotivoCancelamento());
         verify(agendamentoRepository).save(agendamento);
     }
+
+        @Test
+    @DisplayName("Deve criar agendamento quando todos os dados são válidos")
+    void deveCriarAgendamentoComDadosValidos() {
+        LocalDateTime dataFutura = LocalDateTime.now().plusDays(5);
+        Paciente paciente = new Paciente();
+        Profissional profissional = new Profissional();
+
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        when(profissionalRepository.findById(1L)).thenReturn(Optional.of(profissional));
+        when(agendamentoRepository.existsByProfissionalIdAndDataHoraAndStatusNot(
+                1L, dataFutura, StatusAgendamento.CANCELADO)).thenReturn(false);
+        when(agendamentoRepository.save(any(Agendamento.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        Agendamento criado = agendamentoService.criar(
+                1L, 1L, dataFutura, TipoAtendimento.CONSULTA);
+
+        assertEquals(StatusAgendamento.AGENDADO, criado.getStatus());
+        assertEquals(dataFutura, criado.getDataHora());
+        assertEquals(TipoAtendimento.CONSULTA, criado.getTipoAtendimento());
+        assertNull(criado.getMotivoCancelamento());
+        verify(agendamentoRepository).save(any(Agendamento.class));
+    }
+
+    @Test
+    @DisplayName("Não deve criar agendamento para paciente inexistente")
+    void naoDeveCriarAgendamentoParaPacienteInexistente() {
+        LocalDateTime dataFutura = LocalDateTime.now().plusDays(5);
+        when(pacienteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException excecao = assertThrows(
+            RecursoNaoEncontradoException.class,
+            () -> agendamentoService.criar(99L, 1L, dataFutura, TipoAtendimento.CONSULTA)
+        );
+
+        assertEquals("Paciente não encontrado", excecao.getMessage());
+        verify(agendamentoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Não deve criar agendamento para profissional inexistente")
+    void naoDeveCriarAgendamentoParaProfissionalInexistente() {
+        LocalDateTime dataFutura = LocalDateTime.now().plusDays(5);
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(new Paciente()));
+        when(profissionalRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException excecao = assertThrows(
+            RecursoNaoEncontradoException.class,
+            () -> agendamentoService.criar(1L, 99L, dataFutura, TipoAtendimento.CONSULTA)
+        );
+
+        assertEquals("Profissional não encontrado", excecao.getMessage());
+        verify(agendamentoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Não deve cancelar um agendamento que já está cancelado")
+    void naoDeveCancelarAgendamentoJaCancelado() {
+        Agendamento agendamento = new Agendamento();
+        agendamento.setId(1L);
+        agendamento.setStatus(StatusAgendamento.CANCELADO);
+
+        when(agendamentoRepository.findById(1L)).thenReturn(Optional.of(agendamento));
+
+        RegraNegocioException excecao = assertThrows(
+            RegraNegocioException.class,
+            () -> agendamentoService.cancelar(1L, "Outro motivo")
+        );
+
+        assertEquals("Este agendamento já está cancelado", excecao.getMessage());
+        verify(agendamentoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Não deve cancelar um agendamento inexistente")
+    void naoDeveCancelarAgendamentoInexistente() {
+        when(agendamentoRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException excecao = assertThrows(
+            RecursoNaoEncontradoException.class,
+            () -> agendamentoService.cancelar(99L, "Motivo qualquer")
+        );
+
+        assertEquals("Agendamento não encontrado", excecao.getMessage());
+    }
+
 }

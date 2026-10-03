@@ -51,9 +51,15 @@ adotado para o cancelamento.
 
 ### Banco de dados
 
-**PostgreSQL como banco principal, H2 em memória nos testes automatizados.**
-O PostgreSQL garante persistência real dos dados; o H2 permite que os testes rodem de
-forma rápida e isolada, sem depender de infraestrutura externa.
+**PostgreSQL como banco principal, H2 em memória nos testes de integração.**
+O PostgreSQL garante persistência real dos dados; o H2, ativado pelo profile `test`,
+permite que os testes de integração rodem de forma rápida e isolada, sem depender de
+infraestrutura externa.
+
+**Dados iniciais via `data.sql`**, para que a API já suba com registros disponíveis —
+incluindo um agendamento cancelado, que demonstra a preservação do histórico. Os
+comandos usam `ON CONFLICT DO NOTHING` e ajustam as sequências de id, de modo que a
+carga é idempotente e a aplicação pode ser reiniciada sem erro.
 
 **Credenciais por variáveis de ambiente**, com valores padrão para execução local
 (`${DB_PASSWORD:1234}`). Isso permite que o avaliador execute o projeto sem
@@ -97,6 +103,15 @@ HTTP distinto.
 **Lombok com `@Getter`/`@Setter` nas entidades**, em vez de `@Data`. O `@Data` gera
 `equals()` e `hashCode()` usando todos os campos, o que pode causar comportamento
 inesperado em entidades JPA.
+
+### Testes
+
+Optei por dois níveis de teste. Os **unitários** (Mockito) verificam as regras de
+negócio isoladamente, sem subir contexto nem banco — são rápidos e falham apontando
+exatamente a regra quebrada. Os **de integração** (MockMvc + H2) exercitam o fluxo
+completo, da requisição HTTP até a persistência, validando também os status de
+resposta e o formato do JSON. Os dois se complementam: o unitário garante a lógica, o
+de integração garante que as camadas estão corretamente conectadas.
 
 ### Nomenclatura
 
@@ -152,7 +167,7 @@ persistência real atendia melhor ao requisito.
 A validação foi feita em duas frentes: testei manualmente todos os endpoints no
 Postman, incluindo os casos de erro (conflito de horário, data no passado, CPF
 duplicado, validações de campo e cancelamento duplicado), conferindo status HTTP e
-corpo das respostas; e escrevi testes automatizados cobrindo as regras de negócio.
-Durante os testes manuais identifiquei que a busca por id de agendamento não existia e
-retornava um erro fora do padrão da API, e implementei o endpoint para manter a
-consistência das respostas.
+corpo das respostas; e escrevi testes automatizados unitários e de integração
+cobrindo as regras de negócio. Durante os testes manuais identifiquei que a busca por
+id de agendamento não existia e retornava um erro fora do padrão da API, e implementei
+o endpoint para manter a consistência das respostas.

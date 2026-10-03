@@ -265,11 +265,26 @@ src/main/java/com/alvaro/clinica_api/
 
 ## Testes
 
-O projeto inclui testes unitários das regras de negócio, com JUnit 5 e Mockito:
+O projeto inclui 13 testes automatizados, divididos em dois níveis:
+
+**Testes unitários** (JUnit 5 + Mockito) — validam as regras de negócio de forma
+isolada, sem banco de dados:
 
 - Agendamento com data no passado é rejeitado
 - Agendamento em horário já ocupado pelo profissional é rejeitado
+- Agendamento com paciente ou profissional inexistente é rejeitado
+- Agendamento válido é criado com status `AGENDADO`
 - Cancelamento altera o status para `CANCELADO` e registra o motivo
+- Cancelamento de agendamento já cancelado é rejeitado
+- Cancelamento de agendamento inexistente é rejeitado
+
+**Testes de integração** (MockMvc + H2 em memória) — exercitam o fluxo completo,
+da requisição HTTP até o banco:
+
+- Criação de agendamento retorna `201` com os dados corretos
+- Horário já ocupado retorna `409`
+- Data no passado retorna `400`
+- Cancelamento retorna `200`, muda o status e mantém o registro consultável
 
 ```bash
 ./mvnw test
