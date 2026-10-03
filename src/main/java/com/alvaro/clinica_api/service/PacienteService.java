@@ -6,10 +6,14 @@ import com.alvaro.clinica_api.exception.RecursoNaoEncontradoException;
 import com.alvaro.clinica_api.exception.RegraNegocioException;
 import com.alvaro.clinica_api.model.Paciente;
 import com.alvaro.clinica_api.repository.PacienteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PacienteService {
+
+    private static final Logger log = LoggerFactory.getLogger(PacienteService.class);
 
     private final PacienteRepository pacienteRepository;
 
@@ -18,11 +22,13 @@ public class PacienteService {
     }
 
     public Paciente criar(Paciente paciente) {
-
         if (pacienteRepository.existsByCpf(paciente.getCpf())) {
+            log.warn("Tentativa de cadastro com CPF duplicado");
             throw new RegraNegocioException("Já existe um paciente cadastrado com este CPF");
         }
-        return pacienteRepository.save(paciente);
+        Paciente salvo = pacienteRepository.save(paciente);
+        log.info("Paciente cadastrado: id={}", salvo.getId());
+        return salvo;
     }
 
     public Paciente buscarPorId(Long id) {
