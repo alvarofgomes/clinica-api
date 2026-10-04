@@ -18,8 +18,8 @@ mantém a modelagem coerente e permite validar a existência do profissional ao 
 
 **Relacionamentos `@ManyToOne`.**
 Um agendamento pertence a um paciente e a um profissional, mas um mesmo paciente ou
-profissional pode ter vários agendamentos. Ambos os relacionamentos são obrigatórios
-(`optional = false`).
+profissional pode ter vários agendamentos, em horários diferentes. Ambos os
+relacionamentos são obrigatórios (`optional = false`).
 
 **Enums para `TipoAtendimento` e `StatusAgendamento`.**
 Garantem que apenas valores válidos cheguem ao banco. Gravados como texto
@@ -31,7 +31,7 @@ Mantive apenas os dois estados necessários ao escopo pedido. A estrutura permit
 evoluir facilmente para outros estados (ex: `EM_ATENDIMENTO`, `ATENDIDO`, `FALTOU`)
 adicionando valores ao enum e os endpoints de transição correspondentes.
 
-### Cancelamento (exclusão lógica)
+### Cancelamento
 
 O cancelamento é feito via `PATCH /agendamentos/{id}/cancelar`, recebendo o motivo no
 corpo da requisição. Optei por `PATCH` em vez de `DELETE` porque a operação **não é
@@ -43,11 +43,10 @@ conflito desconsidera agendamentos cancelados.
 
 ### Ausência de exclusão de pacientes e profissionais
 
-Não implementei exclusão física de pacientes e profissionais. Além de não estar no
-escopo pedido, a remoção comprometeria a integridade do histórico de agendamentos
-(registros órfãos) — algo crítico em contexto clínico. Caso fosse necessário,
-implementaria exclusão lógica (campo `ativo`), mantendo o histórico, no mesmo padrão
-adotado para o cancelamento.
+Não implementei exclusão física de pacientes e profissionais. A remoção comprometeria
+a integridade do histórico de agendamentos (registros órfãos) — algo crítico em
+contexto clínico. Caso fosse necessário, implementaria exclusão lógica (campo
+`ativo`), mantendo o histórico, no mesmo padrão adotado para o cancelamento.
 
 ### Banco de dados
 
@@ -90,7 +89,7 @@ dto/          objetos de entrada e saída da API
 exception/    exceções de domínio e tratamento centralizado de erros
 ```
 
-**Todas as regras de negócio vivem na camada de service**, nunca nos controllers.
+**Todas as regras de negócio vivem na camada de service.**
 
 **DTOs separados para entrada e saída.** Os de entrada não expõem o `id` (gerado pelo
 servidor) e carregam as validações; os de saída controlam exatamente o que a API
@@ -118,12 +117,6 @@ completo, da requisição HTTP até a persistência, validando também os status
 resposta e o formato do JSON. Os dois se complementam: o unitário garante a lógica, o
 de integração garante que as camadas estão corretamente conectadas.
 
-### Nomenclatura
-
-Domínio em português (entidades, campos, métodos, endpoints) e palavras-chave de
-framework em inglês (anotações e query methods do Spring Data, que são interpretados
-pelo próprio framework).
-
 ---
 
 ## 2. O que priorizei e o que ficou de fora
@@ -147,9 +140,6 @@ priorizar as regras de negócio pedidas e manter a API facilmente testável pelo
 avaliador. Em um cenário real, implementaria JWT com perfis distintos (ex: ADMIN para
 cadastros, ATENDENTE para agendamentos), protegendo especialmente os endpoints que
 expõem dados de pacientes.
-
-**Instalação do Oracle.** Em vez disso, demonstrei compatibilidade mantendo a
-persistência agnóstica ao banco (conforme descrito acima).
 
 ---
 

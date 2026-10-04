@@ -42,6 +42,8 @@ cd clinica-api
 
 **Opção A — com Docker (recomendado):**
 
+> Com o Docker Desktop em execução:
+
 ```bash
 docker compose up -d
 ```
@@ -54,6 +56,9 @@ Para parar depois:
 ```bash
 docker compose down
 ```
+
+> Se a porta 5432 já estiver ocupada por um PostgreSQL instalado na máquina, pare o
+> serviço local antes de subir o container — ou use a opção B.
 
 **Opção B — com PostgreSQL instalado localmente:**
 
